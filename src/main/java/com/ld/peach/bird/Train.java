@@ -6,4 +6,8 @@ package com.ld.peach.bird;
  * @author ld
  */
 public class Train {
+
+    public static void main(String[] args) {
+
+    }
 }

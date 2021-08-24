@@ -5,7 +5,6 @@ import ai.djl.modality.cv.ImageFactory;
 import ai.djl.modality.cv.util.NDImageUtils;
 import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDManager;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.ImageIO;
@@ -51,7 +50,7 @@ public class GameUtils {
         return (int) (ThreadLocalRandom.current().nextDouble(0.0, 1.0) * (max - min) + min);
     }
 
-    /**
+    /**ø
      * Image preprocess
      *
      * @param observation input BufferedImage
@@ -61,6 +60,6 @@ public class GameUtils {
         return NDImageUtils.toTensor(
                 NDImageUtils.resize(
                         ImageFactory.getInstance().fromImage(observation).toNDArray(NDManager.newBaseManager(), Image.Flag.GRAYSCALE)
-                        ,80,80));
+                        , 80, 80));
     }
 }

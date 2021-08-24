@@ -15,6 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <djl.version>0.12.0</djl.version>
         <exec.mainClass>com.ld.peach.bird.Train</exec.mainClass>
     </properties>
 
@@ -22,26 +23,26 @@
         <dependency>
             <groupId>ai.djl</groupId>
             <artifactId>api</artifactId>
-            <version>0.12.0</version>
+            <version>${djl.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ai.djl.mxnet</groupId>
             <artifactId>mxnet-engine</artifactId>
-            <version>0.12.0</version>
+            <version>${djl.version}</version>
             <scope>runtime</scope>
         </dependency>
 
         <dependency>
             <groupId>ai.djl</groupId>
             <artifactId>basicdataset</artifactId>
-            <version>0.12.0</version>
+            <version>${djl.version}</version>
         </dependency>
 
         <dependency>
             <groupId>ai.djl</groupId>
             <artifactId>model-zoo</artifactId>
-            <version>0.12.0</version>
+            <version>${djl.version}</version>
         </dependency>
 
         <dependency>
@@ -49,6 +50,13 @@
             <artifactId>mxnet-native-auto</artifactId>
             <version>1.8.0</version>
             <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.20</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

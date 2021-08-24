@@ -78,5 +78,4 @@ public class Constant {
     public final static String GRAPHICS_PARAM = "graphics";
     public final static String BATCH_SIZE_PARAM = "batch-size";
     public final static String PRE_TRAINED_PARAM = "pre-trained";
-
 }

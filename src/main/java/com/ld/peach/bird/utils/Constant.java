@@ -2,6 +2,11 @@ package com.ld.peach.bird.utils;
 
 import java.awt.*;
 
+/**
+ * 常量类
+ *
+ * @author LD
+ */
 public class Constant {
 
     /**

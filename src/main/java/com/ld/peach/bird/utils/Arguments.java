@@ -14,7 +14,7 @@ import static com.ld.peach.bird.utils.Constant.*;
  * -t
  * -b
  *
- * @author ld
+ * @author LD
  */
 public class Arguments {
 

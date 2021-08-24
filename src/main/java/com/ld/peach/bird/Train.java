@@ -1,19 +1,16 @@
 package com.ld.peach.bird;
 
 
-import ai.djl.Model;
 import ai.djl.modality.rl.env.RlEnv;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Train Bird
  *
  * @author ld
  */
+@Slf4j
 public class Train {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Train.class);
 
     /**
      * gameSteps to observe before training
@@ -44,7 +41,8 @@ public class Train {
      */
     static RlEnv.Step[] batchSteps;
 
-    private Train() {}
+    private Train() {
+    }
 
     public static void main(String[] args) {
 

@@ -1,9 +1,9 @@
-package com.ld.peach.bird.utils;
+package com.ld.peach.gundam.utils;
 
 import lombok.Getter;
 import org.apache.commons.cli.*;
 
-import static com.ld.peach.bird.utils.Constant.*;
+import static com.ld.peach.gundam.utils.Constant.*;
 
 /**
  * 这个类负责对从命令行中获取的参数进行解析

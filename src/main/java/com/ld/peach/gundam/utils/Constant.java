@@ -1,4 +1,4 @@
-package com.ld.peach.bird.utils;
+package com.ld.peach.gundam.utils;
 
 import java.awt.*;
 
@@ -18,7 +18,7 @@ public class Constant {
     /**
      * 游戏标题
      */
-    public static final String GAME_TITLE = "Peach Bird";
+    public static final String GAME_TITLE = "Peach-Bird";
 
     /**
      * 窗口位置

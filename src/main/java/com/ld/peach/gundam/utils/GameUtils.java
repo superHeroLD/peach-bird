@@ -1,4 +1,4 @@
-package com.ld.peach.bird.utils;
+package com.ld.peach.gundam.utils;
 
 import ai.djl.modality.cv.Image;
 import ai.djl.modality.cv.ImageFactory;

@@ -13,7 +13,7 @@ import ai.djl.nn.convolutional.Conv2d;
 import ai.djl.nn.core.Linear;
 import ai.djl.training.DefaultTrainingConfig;
 import ai.djl.training.Trainer;
-import com.ld.peach.gundam.game.PeachGundam;
+import com.ld.peach.gundam.game.PeachBird;
 import com.ld.peach.gundam.utils.Arguments;
 import com.ld.peach.gundam.utils.Constant;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ import java.nio.file.Paths;
  * @author LD
  */
 @Slf4j
-public class TrainGundam {
+public class Train {
 
     /**
      * gameSteps to observe before training
@@ -58,7 +58,7 @@ public class TrainGundam {
      */
     static RlEnv.Step[] batchSteps;
 
-    private TrainGundam() {
+    private Train() {
     }
 
     public static void main(String[] args) throws Exception {
@@ -73,7 +73,7 @@ public class TrainGundam {
     }
 
     public static void test(Model model) {
-        PeachGundam game = new PeachGundam(NDManager.newBaseManager(), 1, 1, true);
+        PeachBird game = new PeachBird(NDManager.newBaseManager(), 1, 1, true);
         DefaultTrainingConfig config = setupTrainingConfig();
         try (Trainer trainer = model.newTrainer(config)) {
             RlAgent agent = new QAgent(trainer, REWARD_DISCOUNT);

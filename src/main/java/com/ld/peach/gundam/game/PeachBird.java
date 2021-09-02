@@ -8,6 +8,7 @@ import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDArrays;
 import ai.djl.ndarray.NDList;
 import ai.djl.ndarray.NDManager;
+import com.ld.peach.gundam.game.component.Bird;
 import com.ld.peach.gundam.game.component.Ground;
 import com.ld.peach.gundam.utils.GameUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ import static com.ld.peach.gundam.utils.Constant.*;
  * @author LD
  **/
 @Slf4j
-public class PeachGundam extends Frame implements RlEnv {
+public class PeachBird extends Frame implements RlEnv {
 
     private static final long serialVersionUID = 1L;
 
@@ -60,7 +61,7 @@ public class PeachGundam extends Frame implements RlEnv {
      * @param batchSize        the number of steps to train on per batch
      * @param replayBufferSize the number of steps to hold in the buffer
      */
-    public PeachGundam(NDManager manager, int batchSize, int replayBufferSize, boolean withGraphics) {
+    public PeachBird(NDManager manager, int batchSize, int replayBufferSize, boolean withGraphics) {
         this(manager, new LruReplayBuffer(batchSize, replayBufferSize));
         this.withGraphics = withGraphics;
         if (this.withGraphics) {
@@ -80,7 +81,7 @@ public class PeachGundam extends Frame implements RlEnv {
     }
 
 
-    public PeachGundam(NDManager manager, ReplayBuffer replayBuffer) {
+    public PeachBird(NDManager manager, ReplayBuffer replayBuffer) {
         this.manager = manager;
         this.replayBuffer = replayBuffer;
     }

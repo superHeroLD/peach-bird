@@ -31,7 +31,7 @@ public class GameElementLayer {
                 pipe.draw(g, bird);
             } else {
                 Pipe remove = pipes.remove(i);
-                PipePool.giveBack(remove);
+                Pipe.PipePool.giveBack(remove);
                 i--;
             }
         }
@@ -58,11 +58,11 @@ public class GameElementLayer {
             //随机生成水管高度
             int topHeight = GameUtils.getRandomNumber(MIN_HEIGHT, MAX_HEIGHT + 1);
 
-            Pipe top = PipePool.get();
+            Pipe top = Pipe.PipePool.get();
             top.setAttribute(Constant.FRAME_WIDTH, -Pipe.TOP_PIPE_LENGTHENING,
                     topHeight + Pipe.TOP_PIPE_LENGTHENING, Pipe.TYPE_TOP_NORMAL, true);
 
-            Pipe bottom = PipePool.get();
+            Pipe bottom = Pipe.PipePool.get();
             bottom.setAttribute(Constant.FRAME_WIDTH, topHeight + VERTICAL_INTERVAL,
                     Constant.FRAME_HEIGHT - topHeight - VERTICAL_INTERVAL, Pipe.TYPE_BOTTOM_NORMAL, true);
 
@@ -76,12 +76,12 @@ public class GameElementLayer {
             int currentDistance = lastPipe.getX() - bird.getBirdX() + Bird.BIRD_WIDTH / 2;
             // 小于得分距离则得分
             final int SCORE_DISTANCE = Pipe.PIPE_WIDTH * 2 + HORIZONTAL_INTERVAL;
-            if (pipes.size() >= PipePool.FULL_PIPE
+            if (pipes.size() >= Pipe.PipePool.FULL_PIPE
                     && currentDistance <= SCORE_DISTANCE + Pipe.PIPE_WIDTH * 3 / 2
                     && currentDistance > SCORE_DISTANCE + Pipe.PIPE_WIDTH * 3 / 2 - Constant.GAME_SPEED) {
                 PeachBird.setCurrentReward(0.8f);
             }
-            if (pipes.size() >= PipePool.FULL_PIPE
+            if (pipes.size() >= Pipe.PipePool.FULL_PIPE
                     && currentDistance <= SCORE_DISTANCE
                     && currentDistance > SCORE_DISTANCE - Constant.GAME_SPEED) {
                 ScoreCounter.getInstance().score(bird);
@@ -103,11 +103,11 @@ public class GameElementLayer {
         // 新水管的x坐标 = 最后一对水管的x坐标 + 水管的间隔
         int x = lastPipe.getX() + HORIZONTAL_INTERVAL;
 
-        Pipe top = PipePool.get();
+        Pipe top = Pipe.PipePool.get();
         top.setAttribute(x, -Pipe.TOP_PIPE_LENGTHENING, topHeight + Pipe.TOP_PIPE_LENGTHENING,
                 Pipe.TYPE_TOP_NORMAL, true);
 
-        Pipe bottom = PipePool.get();
+        Pipe bottom = Pipe.PipePool.get();
         bottom.setAttribute(x, topHeight + VERTICAL_INTERVAL, Constant.FRAME_HEIGHT - topHeight - VERTICAL_INTERVAL,
                 Pipe.TYPE_BOTTOM_NORMAL, true);
 
@@ -134,7 +134,7 @@ public class GameElementLayer {
 
     public void reset() {
         for (Pipe pipe : pipes) {
-            PipePool.giveBack(pipe);
+            Pipe.PipePool.giveBack(pipe);
         }
         pipes.clear();
     }

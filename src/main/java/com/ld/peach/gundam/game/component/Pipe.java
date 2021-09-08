@@ -154,7 +154,8 @@ public class Pipe {
     private void movement() {
         x -= velocity;
         pipeCollisionRect.x -= velocity;
-        if (x < -1 * PIPE_HEAD_WIDTH) {// 水管完全离开了窗口
+        // 水管完全离开了窗口
+        if (x < -1 * PIPE_HEAD_WIDTH) {
             visible = false;
         }
     }
@@ -178,18 +179,19 @@ public class Pipe {
         return visible;
     }
 
-    static class PipePool {
-        private static final List<Pipe> pool = new ArrayList<>();
+    public static class PipePool {
+        private static final List<Pipe> POOL = new ArrayList<>();
 
         // 容器内水管数量 = 窗口可容纳的水管数量+2， 由窗口宽度、水管宽度、水管间距算得
         public static final int FULL_PIPE = (Constant.FRAME_WIDTH
                 / (Pipe.PIPE_HEAD_WIDTH + GameElementLayer.HORIZONTAL_INTERVAL) + 2) * 2;
-        public static final int MAX_PIPE_COUNT = 30; // 对象池中对象的最大个数
+        // 对象池中对象的最大个数
+        public static final int MAX_PIPE_COUNT = 30;
 
         // 初始化水管容器
         static {
             for (int i = 0; i < FULL_PIPE; i++) {
-                pool.add(new Pipe());
+                POOL.add(new Pipe());
             }
         }
 
@@ -199,9 +201,9 @@ public class Pipe {
          * @return pipe from pipePool
          */
         public static Pipe get() {
-            int size = pool.size();
+            int size = POOL.size();
             if (size > 0) {
-                return pool.remove(size - 1); // 移除并返回最后一个
+                return POOL.remove(size - 1); // 移除并返回最后一个
             } else {
                 return new Pipe(); // 空对象池，返回一个新对象
             }
@@ -211,8 +213,8 @@ public class Pipe {
          * 归还对象给容器
          */
         public static void giveBack(Pipe pipe) {
-            if (pool.size() < MAX_PIPE_COUNT) {
-                pool.add(pipe);
+            if (POOL.size() < MAX_PIPE_COUNT) {
+                POOL.add(pipe);
             }
         }
     }

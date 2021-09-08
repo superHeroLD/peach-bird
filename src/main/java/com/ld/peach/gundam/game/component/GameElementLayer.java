@@ -75,15 +75,15 @@ public class GameElementLayer {
             // 小鸟和最后一根水管的距离
             int currentDistance = lastPipe.getX() - bird.getBirdX() + Bird.BIRD_WIDTH / 2;
             // 小于得分距离则得分
-            final int SCORE_DISTANCE = Pipe.PIPE_WIDTH * 2 + HORIZONTAL_INTERVAL;
+            final int scoreDistance = Pipe.PIPE_WIDTH * 2 + HORIZONTAL_INTERVAL;
             if (pipes.size() >= Pipe.PipePool.FULL_PIPE
-                    && currentDistance <= SCORE_DISTANCE + Pipe.PIPE_WIDTH * 3 / 2
-                    && currentDistance > SCORE_DISTANCE + Pipe.PIPE_WIDTH * 3 / 2 - Constant.GAME_SPEED) {
+                    && currentDistance <= scoreDistance + Pipe.PIPE_WIDTH * 3 / 2
+                    && currentDistance > scoreDistance + Pipe.PIPE_WIDTH * 3 / 2 - Constant.GAME_SPEED) {
                 PeachBird.setCurrentReward(0.8f);
             }
             if (pipes.size() >= Pipe.PipePool.FULL_PIPE
-                    && currentDistance <= SCORE_DISTANCE
-                    && currentDistance > SCORE_DISTANCE - Constant.GAME_SPEED) {
+                    && currentDistance <= scoreDistance
+                    && currentDistance > scoreDistance - Constant.GAME_SPEED) {
                 ScoreCounter.getInstance().score(bird);
             }
             if (lastPipe.isInFrame()) {

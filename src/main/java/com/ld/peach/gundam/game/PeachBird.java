@@ -3,6 +3,7 @@ package com.ld.peach.gundam.game;
 import ai.djl.modality.rl.ActionSpace;
 import ai.djl.modality.rl.LruReplayBuffer;
 import ai.djl.modality.rl.ReplayBuffer;
+import ai.djl.modality.rl.agent.RlAgent;
 import ai.djl.modality.rl.env.RlEnv;
 import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDArrays;
@@ -11,6 +12,7 @@ import ai.djl.ndarray.NDManager;
 import com.ld.peach.gundam.game.component.Bird;
 import com.ld.peach.gundam.game.component.GameElementLayer;
 import com.ld.peach.gundam.game.component.Ground;
+import com.ld.peach.gundam.utils.Constant;
 import com.ld.peach.gundam.utils.GameUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,6 +21,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Queue;
 
 import static com.ld.peach.gundam.utils.Constant.*;
@@ -31,7 +34,6 @@ import static com.ld.peach.gundam.utils.Constant.*;
  **/
 @Slf4j
 public class PeachBird extends Frame implements RlEnv {
-
     private static final long serialVersionUID = 1L;
 
     private static int gameState;
@@ -49,14 +51,8 @@ public class PeachBird extends Frame implements RlEnv {
     private NDList currentObservation;
     private ActionSpace actionSpace;
 
-    public static int gameStep = 0;
-    public static int trainStep = 0;
-    private static boolean currentTerminal = false;
-    private static float currentReward = 0.2f;
-    private String trainState = "observe";
-
     /**
-     * Constructs for PeachBird
+     * Constructs with a basic {@link LruReplayBuffer}.
      *
      * @param manager          the manager for creating the game in
      * @param batchSize        the number of steps to train on per batch
@@ -81,21 +77,142 @@ public class PeachBird extends Frame implements RlEnv {
         setGameState(GAME_START);
     }
 
-
+    /**
+     * Constructs PeachBird
+     *
+     * @param manager      the manager for creating the game in
+     * @param replayBuffer the replay buffer for storing data
+     */
     public PeachBird(NDManager manager, ReplayBuffer replayBuffer) {
         this.manager = manager;
         this.replayBuffer = replayBuffer;
     }
 
+    public static int gameStep = 0;
+    public static int trainStep = 0;
+    private static boolean currentTerminal = false;
+    private static float currentReward = 0.2f;
+    private String trainState = "observe";
+
     /**
-     * 图像帧队列，只存4帧
+     * {@inheritDoc}
      */
+    @Override
+    public Step[] runEnvironment(RlAgent agent, boolean training) {
+        Step[] batchSteps = new Step[0];
+        reset();
+
+        // run the game
+        NDList action = agent.chooseAction(this, training);
+        step(action, training);
+        if (training) {
+            batchSteps = this.getBatch();
+        }
+        if (gameStep % 5000 == 0) {
+            this.closeStep();
+        }
+        if (gameStep <= OBSERVE) {
+            trainState = "observe";
+        } else {
+            trainState = "explore";
+        }
+        gameStep++;
+        return batchSteps;
+    }
+
+    /**
+     * {@inheritDoc}
+     * action[0] == 1 : do nothing
+     * action[1] == 1 : flap the bird
+     */
+    @Override
+    public void step(NDList action, boolean training) {
+        if (action.singletonOrThrow().getInt(1) == 1) {
+            bird.birdFlap();
+        }
+        stepFrame();
+        if (this.withGraphics) {
+            repaint();
+            try {
+                Thread.sleep(FPS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        NDList preObservation = currentObservation;
+        currentObservation = createObservation(currentImg);
+
+        FlappyBirdStep step = new FlappyBirdStep(manager.newSubManager(),
+                preObservation, currentObservation, action, currentReward);
+        if (training) {
+            replayBuffer.addStep(step);
+        }
+        log.info("GAME_STEP " + gameStep +
+                " / " + "TRAIN_STEP " + trainStep +
+                " / " + getTrainState() +
+                " / " + "ACTION " + (Arrays.toString(action.singletonOrThrow().toArray())) +
+                " / " + "REWARD " + step.getReward().getFloat() +
+                " / " + "SCORE " + getScore());
+        if (gameState == GAME_OVER) {
+            restartGame();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NDList getObservation() {
+        return currentObservation;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ActionSpace getActionSpace() {
+        return this.actionSpace;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Step[] getBatch() {
+        return replayBuffer.getBatch();
+    }
+
+    /**
+     * Close the steps in replayBuffer which are not pointed to.
+     */
+    public void closeStep() {
+        replayBuffer.closeStep();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void close() {
+        manager.close();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void reset() {
+        currentReward = 0.2f;
+        currentTerminal = false;
+    }
+
     private final Queue<NDArray> imgQueue = new ArrayDeque<>(4);
 
     /**
-     * 将图像转换为 CNN 输入。
-     * 复制初始帧图像，堆栈到NDList，
-     * 然后用当前帧替换第四帧，保证批量图片连续
+     * Convert image to CNN input.
+     * Copy the initial frame image, stack into NDList,
+     * then replace the fourth frame with the current frame to ensure that the batch picture is continuous.
      *
      * @param currentImg the image of current frame
      * @return the CNN input
@@ -119,15 +236,92 @@ public class PeachBird extends Frame implements RlEnv {
         }
     }
 
+    static final class FlappyBirdStep implements RlEnv.Step {
+        private final NDManager manager;
+        private final NDList preObservation;
+        private final NDList postObservation;
+        private final NDList action;
+        private final float reward;
+
+        private FlappyBirdStep(NDManager manager, NDList preObservation, NDList postObservation, NDList action, float reward) {
+            this.manager = manager;
+            this.preObservation = preObservation;
+            this.postObservation = postObservation;
+            this.action = action;
+            this.reward = reward;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public NDList getPreObservation() {
+            return preObservation;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public NDList getPostObservation() {
+            return postObservation;
+        }
+
+        @Override
+        public ActionSpace getPostActionSpace() {
+            return null;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public NDList getAction() {
+            return action;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public NDArray getReward() {
+            return manager.create(reward);
+        }
+
+        @Override
+        public boolean isDone() {
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void close() {
+            this.manager.close();
+        }
+    }
+
     /**
-     * 初始化游戏窗口
+     * Draw one frame by performing all elements' draw function.
+     */
+    public void stepFrame() {
+        Graphics bufG = currentImg.getGraphics();
+        bufG.setColor(Constant.BG_COLOR);
+        bufG.fillRect(0, 0, Constant.FRAME_WIDTH, Constant.FRAME_HEIGHT);
+        ground.draw(bufG, bird);
+        bird.draw(bufG);
+        gameElement.draw(bufG, bird);
+    }
+
+    /**
+     * Initialize the game frame
      */
     private void initFrame() {
         setSize(FRAME_WIDTH, FRAME_HEIGHT);
         setTitle(GAME_TITLE);
         setLocation(FRAME_X, FRAME_Y);
-        //这里能否调整窗口大小
-        setResizable(true);
+        setResizable(false);
         setVisible(true);
         addWindowListener(new WindowAdapter() {
             @Override
@@ -137,33 +331,40 @@ public class PeachBird extends Frame implements RlEnv {
         });
     }
 
-    @Override
-    public void reset() {
-
+    /**
+     * Restart game
+     */
+    private void restartGame() {
+        setGameState(GAME_START);
+        gameElement.reset();
+        bird.reset();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public NDList getObservation() {
-        return null;
+    public void update(Graphics g) {
+        g.drawImage(currentImg, 0, 0, null);
     }
 
-    @Override
-    public ActionSpace getActionSpace() {
-        return null;
+    public static void setGameState(int gameState) {
+        PeachBird.gameState = gameState;
     }
 
-    @Override
-    public Step step(NDList action, boolean training) {
-        return null;
+    public String getTrainState() {
+        return this.trainState;
     }
 
-    @Override
-    public Step[] getBatch() {
-        return new Step[0];
+    public static void setCurrentTerminal(boolean currentTerminal) {
+        PeachBird.currentTerminal = currentTerminal;
     }
 
-    @Override
-    public void close() {
+    public static void setCurrentReward(float currentReward) {
+        PeachBird.currentReward = currentReward;
+    }
 
+    public long getScore() {
+        return this.bird.getCurrentScore();
     }
 }
